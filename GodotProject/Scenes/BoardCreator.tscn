@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://h6cnyc33ugcp"]
+
+[ext_resource type="Script" uid="uid://dqsf58gu1fb32" path="res://Scripts/PreProduction/BoardCreator.gd" id="1_hk4ym"]
+
+[node name="BoardCreator" type="Node3D" unique_id=1102002025]
+script = ExtResource("1_hk4ym")

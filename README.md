@@ -35,28 +35,34 @@
 - Cynthia Tristán Álvarez [@cyntrist](https://github.com/cyntrist)
 
 ## Resumen
-<!-- La práctica consiste en desarrollar un prototipo de IA para Videojuegos, dentro de un entorno virtual que representa una prisión espacial con varios prisioneros (todos enemigos mortales entre sí) más un grupo de vigilantes robóticos que tratan de poner orden. En este entorno nosotros tenemos que programar a un agente inteligente capaz de percibir, moverse, navegar y decidir, como uno más de los prisioneros, de modo que logre maximizar el número de enemigos abatidos y minimizar el número de ocasiones en que él mismo es eliminado. -->
+Prototipo de combate táctico por turnos en Godot, basado en la serie *Tactics RPG* de The Liquid Fire y a su vez en su adaptación a Godot por *7thSage*. El estado actual incluye tablero con alturas, selección de unidades, movimiento por casillas, control de cámara y una máquina de estados para el flujo principal del combate, pero está previsto continuar el desarrollo hasta el estado más reciente de la serie con habilidades, estadísticas y turnos.
+
+El objetivo académico es extender esta base con inteligencia artificial para enemigos, implementando dos tipos de sistemas: sistemas basados en reglas y sistemas de utilidad, permitiendo evaluar decisiones tácticas en un entorno controlado. El objetivo práctico es comparar los dos enfoques de IA enfrentándolos entre sí en batallas automáticas y analizando métricas de rendimiento y eficacia.
 
 ## Instalación y uso
-<!-- Todo el contenido del proyecto está disponible en este repositorio, con **Unity 6000.0.66f2** siendo capaces de bajar todos los paquetes necesarios y editar el proyecto. -->
+Todo el contenido del proyecto está disponible en este repositorio, con **Godot 4.6** siendo la versión con la que ejecutar el proyecto.
 
 ## Introducción
-<!-- Este proyecto es una práctica de la asignatura de Inteligencia Artificial para Videojuegos del Grado en Desarrollo de Videojuegos de la UCM, cuyo enunciado original es este: [Disturbios Orbitales](https://narratech.com/es/inteligencia-artificial-para-videojuegos/navegacion/el-secreto-del-laberinto/).
+El proyecto se enmarca en la asignatura de Inteligencia Artificial para Videojuegos del Grado en Desarrollo de Videojuegos (UCM). La propuesta parte de un prototipo táctico por turnos para estudiar, implementar y evaluar técnicas de toma de decisiones en agentes no jugadores. 
 
-Las prisiones espaciales funcionan como potentes metáforas sobre vigilancia extrema y deshumanización de los reclusos. En estos casos los disturbios pueden originarse por auténticas crisis de supervivencia que se dan en las órbitas de planetas perdidos y otros rincones olvidados del universo.
+La referencia principal es la serie *Tactics RPG* de The Liquid Fire y, en particular, la serie *Godot Tactics RPG*. Esta elección permite trabajar sobre una base técnica conocida (tablero, unidades, movimiento, habilidades y estados de batalla) y centrar el esfuerzo en la capa de IA, campo que la serie de tutoriales aún no cubre, a diferencia de la versión original en Unity.
 
-Entorno a este tema vamos a desarrollar un prototipo centrado en modelar la toma de decisiones de distintos «prisioneros», que intervienen en disturbios armados que se producen en una prisión imaginaria ubicada en una de las lunas que orbitan en torno a Saturno.
-
-Este prototipo sirve para poner en práctica una de las herramientas de toma de decisiones más populares de la industria: la máquina de estados, concretamente la máquina de estados jerárquica. Además se aprovechará la búsqueda de caminos mediante mallas de navegación y el movimiento mediante comportamientos de dirección y hasta algo de gestión sensorial, pero esta vez aprovechando todo lo posible las herramientas que Unity trae integradas. -->
+Este prototipo sirve para poner en práctica una de las formas de IA más fundamentales y entendibles de la historia de la inteligencia artificial, sistemas basados en reglas, junto a sistemas basados en utilidad como enfoque avanzado con mejor adaptación situacional. El resultado esperado es un sistema capaz de ejecutar combates tácticos con agentes autónomos, con comportamientos comparables y medibles dentro de un mismo entorno de juego.
 
 ## Punto de partida
-<!-- Hemos partido de un proyecto base proporcionado por el profesor y disponible en este repositorio: [fps](https://github.com/narratech/fps).
+Se ha implementado desde cero, siguiendo la serie de tutoriales en la que está basado el proyecto, la base sobre la trabajar, que consiste en un entorno isométrico 3D de combate entre dos bandos con unidades capaces de moverse y atacar cuerpo a cuerpo o con habilidades en un cierto rango a lo largo de un entorno en cuadrícula con distintas alturas. 
 
-La base consiste en un menú inicial desde el que se puede iniciar la simulación y consultar los controles del juego.
+La implementación de la práctica se centra en el desarrollo de la inteligencia artificial que controlará cada unidad de las tropas de dos ejércitos en la escena. Las tropas de cada bando se diferencian por su color principal.
 
-La implementación de la práctica se centra en el desarrollo de la inteligencia artificial que controlará a *Player* en la escena. 
+Al iniciar el prototipo, en el menú principal habrá botones para salir y jugar. Al clicar el de jugar, se iniciará la escena principal de combate y a su vez la simulación, que contará con dos bandos enfrentados y cada uno con distintos tipos de unidades.
 
-Al clicar al botón *Play* en la escena *IntroMenu*, con el que iniciará el juego, se va a la escena *MainScene*, el nivel de la cárcel espacial, un entorno 3D explorable donde irán apareciendo:
+Según el tipo que son, una unidad puede ser:
+
+- Terrestre: en su movimiento puede saltar diferencias de altura +/- 1.
+- Volador: en su movimiento ignora las alturas, pero necesita que haya suelo en todo su camino.
+- Teleportante: en su movimiento ignora tanto las alturas como la necesidad de suelo entre su inicio y su final de trayecto.
+
+<!-- Al clicar al botón *Play* en la escena *IntroMenu*, con el que iniciará el juego, se va a la escena *MainScene*, el nivel de la cárcel espacial, el entorno 3D donde irán apareciendo:
 - Prisioneros. Aparecen en alguno de los puntos de regeneración. Pueden moverse, disparar, apuntar, cambiar de arma y correr. Sus movimientos podrán ser implementados mediante mecánicas de IA.
 
 - Recogibles. Sólo los prisioneros pueden cogerlos o utilizarlos:
@@ -67,31 +73,35 @@ Al clicar al botón *Play* en la escena *IntroMenu*, con el que iniciará el jue
 
 - Vigilantes robóticos. Hay de dos tipos, las torretas (Turrets) y los robots flotantes (HoverBots). Las primeras son más poderosas pero permanecen ancladas en sus ubicaciones originales, mientras que los segundos son más débiles pero tienen movilidad. Todos los vigilantes robóticos disparan a los prisioneros y pueden matarlos.  -->
 
+
 #### Jerarquía de recursos
-<!-- ```text
-Assets
-├── FPS
-│   ├── Animation
-│   ├── Art
-│   ├── Audio
-│   ├── Prefabs
-│   ├── Scenes
-│   ├── Scripts
-│   │   ├── AI
-│   │   ├── Game
-│   │   ├── Gameplay 
-│   │   ├── **StateMachine**
-│   │   └── UI
-│   └── Tutorials
-├── ModAssets
-├── NavMeshComponents
-├── Rendering
-└── TextMesh Pro
+```text
+GodotProject
+|-- addons
+|   `-- BoardCreatorInspector
+|-- Data
+|   `-- Levels
+|-- Materials
+|-- Prefabs
+|-- Scenes
+|-- Scripts
+|   |-- Common
+|   |   |-- Input
+|   |   |-- State Machine
+|   |   `-- UI
+|   |-- Controller
+|   |   `-- Battle States
+|   |-- Enum Extensions
+|   |-- PreProduction
+|   |-- Test
+|   `-- View Model Component
+|       `-- Movement
+|-- Settings
+`-- Textures
+    `-- UI
 ```
 
-El grueso de la implementación que concierne a esta práctica está situado en la carpeta **StateMachine**. -->
-
-### Estructura del proyecto
+<!-- ### Estructura del proyecto -->
 <!-- Dentro de FPS los recursos que conforman el proyecto están organizados de esta forma:
 * **Animation**. Animaciones, character controllers, máscaras y rigs de todos los personajes que conforman el juego.
 * **Art**. Fuentes, materiales, modelos, shaders y texturas.
@@ -102,7 +112,7 @@ El grueso de la implementación que concierne a esta práctica está situado en 
 * **StateMachine**. Todas las clases con el código de la implementación de la práctica 3 "Disturbios orbitales" para la asignatura de Inteligencia Artificial para Videojuegos, usadas para la gestión de la máquina de estados de los agentes y de sus acciones.
 * **Tutorials**. Recursos utilizados para la gestión del tutorial del proyecto base. -->
 
-### Estructura de las escenas
+<!-- ### Estructura de las escenas -->
 <!-- Para la implementación del proyecto son relevantes dos escenas:
 * IntroMenu: Se muestra un botón para jugar y un botón para visualizar los controles.
 * MainScene: El mundo virtual con obstáculos, enemigos y puntos de regeneración de personajes y objetos, con su respectiva NavMesh para su correcta navegación. -->
@@ -110,19 +120,20 @@ El grueso de la implementación que concierne a esta práctica está situado en 
 ## Planteamiento del problema
 **Las características principales del prototipo son:**
 
-* **A.** 
+* **A.** Hay un **mundo virtual** representado por una cuadrícula 3D de distintas alturas que representa el terreno del combate entre dos bandos con el mismo número de tropas cada uno, diferenciados por su color principal. El escenario sobre el que se combatirá será generado proceduralmente en cada simulación. Hay una cámara principal que el jugador controla en su la rotación y que se centrará en la unidad que esté realizando su turno, y también se contará con una cámara secundaria con una visión general de toda la rejilla.
 
-* **B.** 
+* **B.** El **flujo del combate** está modelado con estados explícitos a través de una máquina de estados finita para mantener trazabilidad y facilitar la integración de decisiones automáticas. La máquina de estados diferencia entre las distintas fases de los turnos de cada unidad. El órden de ejecución de dichos turnos viene dado por las estadísticas de la unidad al principio de la simulación y tras acabar su turno se recalcula su próxima posición.
 
-* **C.** 
+* **C.**  El movimiento de las **tropas** y sus habilidades están limitados por alcance, calculado por BFS, según el tipo de unidad y la ejecución de sus acciones es secuencial. En su turno, una unidad podrá moverse y atacar o esperar, y la toma de decisiones será llevada a cabo por inteligencia artificial sin intervención del jugador. 
 
-* **D.** 
+* **D.** Uno de los bandos luchará a través de un **sistema de decisión basado en reglas**, compuesto por reglas tácticas explícitas y ordenadas por prioridad. Este controlador resolverá cada turno evaluando condiciones del estado del combate (vida propia y enemiga, alcance de movimiento, objetivos disponibles, riesgo de fuego amigo y exposición) para elegir acciones concretas. La interfaz mostrará las métricas principales: FPS y bajas de cada equipo. Cada sistema de IA intentará minimizar sus propias bajas y maximizar los FPS, por lo tanto minimizando su tiempo de ejecución.
 
-* **E.** 
+* **E.** El otro bando usará un **sistema basado en utilidad** en el que cada acción candidata (moverse a una casilla, usar una habilidad, elegir objetivo y orientación) recibirá una puntuación numérica. Esa puntuación combinará factores como daño esperado, probabilidad de impacto, riesgo recibido, ventaja posicional y valor estratégico del objetivo. 
 
 ## Diseño de la solución
 
-
+<!-- Su principal ventaja es la interpretabilidad: cada decisión puede trazarse a una regla concreta, facilitando depuración y análisis. -->
+<!-- La IA seleccionará la alternativa con mayor utilidad total, permitiendo decisiones más adaptativas y un comportamiento menos rígido que el enfoque por reglas. -->
 
 ## Implementación
 **Tareas:**
@@ -207,7 +218,7 @@ RunAwayState <|-- State
     }
 ``` -->
 
-Implementación: Se adjuntan los scripts con el código fuente que implementan las principales características. Los scripts están documentados para mayor claridad y detalle sobre su implementación.
+<!-- Implementación: Se adjuntan los scripts con el código fuente que implementan las principales características. Los scripts están documentados para mayor claridad y detalle sobre su implementación. -->
 
 <!-- | Característica del prototipo | Descripción de la característica | Script |
 |:-:|:-:|:-:|
@@ -225,7 +236,7 @@ Implementación: Se adjuntan los scripts con el código fuente que implementan l
 |:-:|:-:|
 | 🟣​​ | 🟡​ | -->
 
-### Clases
+<!-- ### Clases -->
 
 
 ## Pruebas y métricas
@@ -243,7 +254,7 @@ Serie corta y rápida posible de pruebas que pueden realizarse para verificar qu
 -->
 
 ### Métricas tomadas
-En un PC de estas características:
+Se tomarán métricas en un PC de estas características:
 - **CPU:** Intel Core i5-12600KF a 3.70 GHz
 - **GPU:** NVIDIA GeForce RTX 5070 Ti con 16 GB
 - **RAM:** 32 GB (16x2) de 4800 MT/s
@@ -253,19 +264,50 @@ En un PC de estas características:
 <!-- Se han tomado las siguientes métricas: -->
 
 
-<!-- ### Vídeo
-- [Vídeo demostración](https://www.youtube.com/watch?v=wYVlIFyWK8Y) -->
+### Vídeo
+- Próximamente
+<!-- - [Vídeo demostración](https://www.youtube.com/watch?v=wYVlIFyWK8Y) -->
 
 <!-- ## Ampliaciones
 Se han pensado las siguientes posibles ampliaciones: 
 -->
 
 ## Conclusiones
+Próximamente.
 
-## Licencia
-<!-- Nieves Alonso Gilsanz y Cynthia Tristán Álvarez, con el permiso de Federico Peinado, autores de la documentación, código y recursos de este trabajo, concedemos permiso permanente para utilizar este material, con sus comentarios y evaluaciones, con fines educativos o de investigación; ya sea para obtener datos agregados de forma anónima como para utilizarlo total o parcialmente reconociendo expresamente nuestra autoría.  -->
+## Licencias
+Licencia MIT [del punto de partida](https://theliquidfire.com/license/).
+Licencia MIT [de la adaptación de este repositorio](https://github.com/cyntrist/IAV26-TristanAlvarez/blob/main/LICENSE).
 
 ## Referencias
-<!-- A continuación se detallan todas las referencias bibliográficas, lúdicas o de otro tipo utilizdas para realizar este prototipo. Los recursos de terceros que se han utilizados son de uso público.
+A continuación se detallan todas las referencias bibliográficas, lúdicas o de otro tipo utilizdas para realizar este prototipo. Los recursos de terceros que se han utilizados son de uso público.
 
-[^1]: -->
+Referencias acerca del punto de partida:
+
+[^1]: https://theliquidfire.com/projects/
+
+[^2]: https://theliquidfire.com/2015/11/30/tactics-rpg-intro-to-a-i/
+
+[^3]: https://theliquidfire.com/2015/12/07/tactics-rpg-a-i-part-1/
+
+[^4]: https://theliquidfire.com/projects/
+
+Referencias sobre Rule-based systems:
+
+[^5]: https://narratech.com/es/inteligencia-artificial-para-videojuegos/decision/reglas-y-planificacion/
+
+[^6]: https://en.wikipedia.org/wiki/Rule-based_system
+
+[^7]: https://www.geeksforgeeks.org/artificial-intelligence/rule-based-system-in-ai/
+
+Referencias sobre Utility AI:
+
+[^8]: https://narratech.com/es/inteligencia-artificial-para-videojuegos/decision/probabilidad-y-utilidad/
+
+[^9]: https://en.wikipedia.org/wiki/Utility_system
+
+[^10]: https://www.geeksforgeeks.org/artificial-intelligence/utility-based-agents-in-ai/
+
+[^11]: https://psichix.github.io/emergent/decision_makers/utility_ai/introduction.html
+
+[^12]: https://shaggydev.com/2023/04/19/utility-ai/

@@ -9,7 +9,7 @@ var _axisNeg: String
 func _init(negativeAxis:String, positiveAxis:String):
 	_axisNeg = negativeAxis
 	_axisPos = positiveAxis
-	
+
 func Update():
 	var retValue:int = 0
 	var value:int = roundi(Input.get_axis(_axisNeg, _axisPos))

@@ -1,14 +1,20 @@
 extends Node
 class_name Movement
 
-var range: int
-var jumpHeight: int
+var range: int:
+	get:
+		return stats.GetStat(StatTypes.Stat.MOV)
+var jumpHeight: int:
+	get:
+		return stats.GetStat(StatTypes.Stat.JMP)
+var stats:Stats
 var unit: Unit
 var jumper: Node3D
 
 func _init():
 	unit = get_node("../")
 	jumper = get_node("../Jumper")
+	stats = get_node("../Stats")
 
 func GetTilesInRange(board: BoardCreator):
 	var retValue = board.Search(unit.tile, ExpandSearch)
@@ -31,7 +37,7 @@ func Turn(dir:Directions.Dirs):
 		unit.rotation_degrees.y = 360
 	elif unit.dir == Directions.Dirs.WEST && dir == Directions.Dirs.SOUTH:
 		unit.rotation_degrees.y = -90
-	
+  
 	var tween = create_tween()
 	unit.dir = dir
 	tween.tween_property(

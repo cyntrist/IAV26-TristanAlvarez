@@ -16,7 +16,7 @@ var _zoom: int = 10
 
 @export_group("Orbit")
 @export_range(0.01, 5.0, 0.1, "suffix:s") var _orbitDuration: float = 0.25
-@export var _orbitTransition: Tween.TransitionType = Tween.TRANS_SINE
+@export var _orbitTransition: Tween.TransitionType = Tween.TRANS_QUART
 @export var _orbitEase: Tween.EaseType = Tween.EASE_OUT
 
 var _headingIndex: int = 0

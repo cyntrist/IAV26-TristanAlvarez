@@ -3,18 +3,16 @@ extends Node
 class_name Tile
 
 const stepHeight: float = 0.25
-
 var pos: Vector2i
 var height: int
 
 var content: Node
-
 var prev: Tile
 var distance: int
 
 func center() ->Vector3:
 	return Vector3(pos.x, height * stepHeight, pos.y)
-	
+
 func Match():
 	self.scale = Vector3(1, height * stepHeight, 1)
 	self.position = Vector3(pos.x, height * stepHeight /2.0, pos.y)

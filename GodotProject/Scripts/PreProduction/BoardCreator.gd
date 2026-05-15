@@ -7,79 +7,84 @@ extends Node
 @export var height: int = 8
 @export var pos: Vector2i
 var _oldPos: Vector2i
-var tiles: Dictionary[Variant, Variant] = {}
+var tiles = {}
+var tileViewPrefab = preload("res://Prefabs/Tile.tscn")
+var tileSelectionIndicatorPrefab = preload("res://Prefabs/Tile Selection Indicator.tscn")
+var marker
 
-var tileViewPrefab: PackedScene = preload("res://Prefabs/Tile.tscn")
-var tileSelectionIndicatorPrefab: PackedScene = preload("res://Prefabs/Tile Selection Indicator.tscn")
-var marker : Node
-var _random: RandomNumberGenerator = RandomNumberGenerator.new()
-var savePath: String = "res://Data/Levels/"
-@export var fileName: String = "defaultMap.txt"
 var selectedTileColor:Color = Color(0, 1, 1, 1)
 var defaultTileColor:Color = Color(1, 1, 1, 1)
+
+var _random = RandomNumberGenerator.new()
+
+var savePath = "res://Data/Levels/"
+@export var fileName = "defaultMap.txt"
+
+var _min = Vector2i(999999, 999999)
+var _max = Vector2i(-999999, -999999)
+
+var min:Vector2i:
+	get:
+		return _min 
+var max:Vector2i:
+	get:
+		return _max
+
+func _ready():
+	marker = tileSelectionIndicatorPrefab.instantiate()
+	add_child(marker)
+	
+	pos = Vector2i(0,0)
+	_oldPos = pos
+	
+	_random.randomize()
+
+func _process(delta):
+	if pos != _oldPos:
+		_oldPos = pos
+		_UpdateMarker()
 
 func Clear():
 	for key in tiles:
 		tiles[key].free()
 	tiles.clear()
-	_UpdateMarker()
-
-func _GetOrCreate(p: Vector2i):
-	if tiles.has(p):
-		return tiles[p]
 	
-	var t: Tile = _Create()
-	t.Load(p, 0)
-	tiles[p] = t
-	
-	return t
-
-func _Create():
-	var instance: Node = tileViewPrefab.instantiate()
-	add_child(instance)
-	return instance
-
-func _GrowSingle(p: Vector2i):
-	var t: Tile = _GetOrCreate(p)
-	if t.height < height:
-		t.Grow()
-		_UpdateMarker()
-func _ShrinkSingle(p: Vector2i) -> void:
-	if not tiles.has(p):
-		return
-	
-	var t: Tile = tiles[p]
-	t.Shrink()
-	_UpdateMarker()
-	
-	if t.height <= 0:
-		tiles.erase(p)
-		t.free()
+	_min = Vector2i(999999, 999999)
+	_max = Vector2i(-999999, -999999)
 
 func Grow():
 	_GrowSingle(pos)
+
 func Shrink():
 	_ShrinkSingle(pos)
-
-
-func _GrowRect(rect: Rect2i):
-	for y in range(rect.position.y,rect.end.y):
-		for x in range(rect.position.x,rect.end.x):
-			var p: Vector2i = Vector2i(x,y)
-			_GrowSingle(p)
-func _ShrinkRect(rect: Rect2i):
-	for y in range(rect.position.y,rect.end.y):
-		for x in range(rect.position.x,rect.end.x):
-			var p: Vector2i = Vector2i(x,y)
-			_ShrinkSingle(p)
 
 func GrowArea():
 	var r: Rect2i = _RandomRect()
 	_GrowRect(r)
-	
+
 func ShrinkArea():
 	var r: Rect2i = _RandomRect()
 	_ShrinkRect(r)
+
+func Save():
+	var saveFile = savePath + fileName
+	SaveMap(saveFile)
+
+func Load():
+	var saveFile = savePath + fileName
+	LoadMap(saveFile)
+
+func SaveJSON():
+	#var saveFile = savePath + fileName
+	#var save_game = FileAccess.open(saveFile, FileAccess.WRITE)
+	var saveFile = "res://Data/Levels/savegame.json"
+	SaveMapJSON(saveFile)
+
+func LoadJSON():
+	#var saveFile = savePath + fileName
+	#var save_game = FileAccess.open(saveFile, FileAccess.WRITE)
+	var saveFile = "res://Data/Levels/savegame.json"
+	LoadMapJSON(saveFile)
 
 func SaveMap(saveFile):
 	var save_game = FileAccess.open(saveFile, FileAccess.WRITE)
@@ -113,7 +118,12 @@ func LoadMap(saveFile):
 		
 		var t: Tile = _Create()
 		t.Load(Vector2i(save_x, save_z) , save_height)
-		tiles[Vector2i(t.pos.x,t.pos.y)] = t	
+		tiles[Vector2i(t.pos.x,t.pos.y)] = t
+		
+		_min.x = min(_min.x, t.pos.x)
+		_min.y = min(_min.y, t.pos.y)
+		_max.x = max(_max.x, t.pos.x)
+		_max.y = max(_max.y, t.pos.y)	
 	
 	save_game.close()
 	_UpdateMarker()
@@ -160,44 +170,14 @@ func LoadMapJSON(saveFile):
 		var t: Tile = _Create()
 		t.Load(Vector2(mtile["pos_x"], mtile["pos_z"]) , mtile["height"])
 		tiles[Vector2i(t.pos.x,t.pos.y)] = t
+		
+		_min.x = min(_min.x, t.pos.x)
+		_min.y = min(_min.y, t.pos.y)
+		_max.x = max(_max.x, t.pos.x)
+		_max.y = max(_max.y, t.pos.y)
 	
 	save_game.close()
 	_UpdateMarker()
-	
-func Save():
-	var saveFile = savePath + fileName
-	SaveMap(saveFile)
-
-func Load():
-	var saveFile = savePath + fileName
-	LoadMap(saveFile)
-
-func SaveJSON():
-	#var saveFile = savePath + fileName
-	#var save_game = FileAccess.open(saveFile, FileAccess.WRITE)
-	var saveFile = "res://Data/Levels/savegame.json"
-	SaveMapJSON(saveFile)
-
-func LoadJSON():
-	#var saveFile = savePath + fileName
-	#var save_game = FileAccess.open(saveFile, FileAccess.WRITE)
-	var saveFile = "res://Data/Levels/savegame.json"
-	LoadMapJSON(saveFile)
-
-func _ready():
-	marker = tileSelectionIndicatorPrefab.instantiate()
-	add_child(marker)
-	
-	pos = Vector2i(0,0)
-	_oldPos = pos
-	
-	_random.randomize()
-
-func _process(delta):
-	if pos != _oldPos:
-		_oldPos = pos
-		_UpdateMarker()
-
 
 func _UpdateMarker():
 	if tiles.has(pos):
@@ -205,14 +185,59 @@ func _UpdateMarker():
 		marker.position = t.center()
 	else:
 		marker.position = Vector3(pos.x, 0, pos.y)
-			
-func _RandomRect():
-	var x: int = _random.randi_range(0, width - 1)
-	var y: int = _random.randi_range(0, depth - 1)
-	var w: int = _random.randi_range(1, width - x)
-	var h: int = _random.randi_range(1, depth - y)
-	return Rect2i(x, y, w, h)
+
+func _GrowSingle(p: Vector2i):
+	var t: Tile = _GetOrCreate(p)
+	if t.height < height:
+		t.Grow()
+		_UpdateMarker()
+
+func _ShrinkSingle(p: Vector2i):
+	if not tiles.has(p):
+		return
 	
+	var t: Tile = tiles[p]
+	t.Shrink()
+	_UpdateMarker()
+	
+	if t.height <= 0:
+		tiles.erase(p)
+		t.free()
+
+func _GetOrCreate(p: Vector2i):
+	if tiles.has(p):
+		return tiles[p]
+	
+	var t: Tile = _Create()
+	t.Load(p, 0)
+	tiles[p] = t
+	
+	return t
+
+func _Create():
+	var instance = tileViewPrefab.instantiate()
+	add_child(instance)
+	return instance
+
+func _RandomRect():
+	var x = _random.randi_range(0, width - 1)
+	var y = _random.randi_range(0, depth - 1)
+	var w = _random.randi_range(1, width - x)
+	var h = _random.randi_range(1, depth - y)
+	return Rect2i ( x, y, w, h )
+
+func _GrowRect(rect: Rect2i):
+	for y in range(rect.position.y,rect.end.y):
+		for x in range(rect.position.x,rect.end.x):
+			var p = Vector2i(x,y)
+			_GrowSingle(p)
+
+func _ShrinkRect(rect: Rect2i):
+	for y in range(rect.position.y,rect.end.y):
+		for x in range(rect.position.x,rect.end.x):
+			var p = Vector2i(x,y)
+			_ShrinkSingle(p)
+
 func ClearSearch():
 	for key in tiles:
 		tiles[key].prev = null
@@ -220,10 +245,10 @@ func ClearSearch():
 		
 func GetTile(p: Vector2i):
 	return tiles[p] if tiles.has(p) else null
-	
+
 func Search(start: Tile, addTile: Callable):
 	var retValue = []
-	retValue.append(start)	
+	retValue.append(start)  
 	ClearSearch()
 	var checkNext = []
 	
@@ -234,42 +259,46 @@ func Search(start: Tile, addTile: Callable):
 	
 	while checkNext.size() > 0:
 		var t:Tile = checkNext.pop_front()
-		#_dirs.shuffle() #Optional. May impact performance	
+		
+		_dirs.shuffle() #Optional. May impact performance
+		
 		for i in _dirs.size():
 			var next:Tile = GetTile(t.pos + _dirs[i])
 			if next == null || next.distance <= t.distance + 1:
 				continue
+			
 			if addTile.call(t, next):
 				next.distance = t.distance + 1
 				next.prev = t
 				checkNext.push_back(next)
 				retValue.append(next)
 	return retValue
-	
-func SelectTiles(tileList:Array):	
+
+func RangeSearch(start: Tile, addTile: Callable, range: int):
+	var retValue = []
+	ClearSearch()
+	start.distance = 0
+
+	for y in range(-range, range+1):
+		for x in range(-range + abs(y), range - abs(y) +1):
+			var next:Tile = GetTile(start.pos + Vector2i(x,y))
+			if next == null:
+				continue
+
+			if next == start:
+				if addTile.call(start, start):
+					retValue.append(start)
+			elif addTile.call(start, next):
+				next.distance = (abs(x) + abs(y))
+				next.prev = start
+				retValue.append(next)
+
+	return retValue
+
+func SelectTiles(tileList:Array):  
 	for i in tileList.size():
 		tileList[i].get_node("MeshInstance3D").material_override.albedo_color = selectedTileColor
 
 func DeSelectTiles(tileList:Array):
 	for i in tileList.size():
 		tileList[i].get_node("MeshInstance3D").material_override.albedo_color = defaultTileColor
-		
-func RangeSearch(start: Tile, addTile: Callable, range: int):
-	var retValue = []
-	ClearSearch()
-	start.distance = 0
-	
-	for y in range(-range, range+1):
-		for x in range(-range + abs(y), range - abs(y) +1):
-			var next:Tile = GetTile(start.pos + Vector2i(x,y))
-			if next == null:
-				continue
-				
-			if next == start:
-				retValue.append(start)
-			elif addTile.call(start, next):
-				next.distance = (abs(x) + abs(y))
-				next.prev = start
-				retValue.append(next)
-	
-	return retValue

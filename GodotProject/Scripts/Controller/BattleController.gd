@@ -4,15 +4,32 @@ class_name BattleController
 @export var board: BoardCreator
 @export var inputController: InputController
 @export var cameraController: CameraController
+@export var conversationController: ConversationController
+
 @export var stateMachine: StateMachine
 @export var startState: State
-#var heroPrefab = preload("res://Prefabs/Hero.tscn")#replaced by @export/PackedScene
-@export var heroPrefab: PackedScene
 
-var currentUnit:Unit
+@export var abilityMenuPanelController:AbilityMenuPanelController
+@export var statPanelController:StatPanelController
+
+@export var turnOrderController:TurnOrderController
+@export var hitSuccessIndicator:HitSuccessIndicator
+
+var turn:Turn = Turn.new()
+var units:Array[Unit] = []
+
+var heroPrefab = preload("res://Prefabs/Hero.tscn")
 
 var currentTile:Tile: 
 	get: return board.GetTile(board.pos)
 
 func _ready():
 	stateMachine.ChangeState(startState)
+
+func GetParentUnit(node:Node):
+	var parent = node.get_parent()
+	if parent == null:
+		return null
+	if parent is Unit:
+		return parent
+	return GetParentUnit(parent)

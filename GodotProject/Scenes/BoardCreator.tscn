@@ -1,6 +1,6 @@
-[gd_scene format=3 uid="uid://h6cnyc33ugcp"]
+[gd_scene load_steps=2 format=3 uid="uid://bt4vafbh7w2tf"]
 
-[ext_resource type="Script" uid="uid://dqsf58gu1fb32" path="res://Scripts/PreProduction/BoardCreator.gd" id="1_hk4ym"]
+[ext_resource type="Script" path="res://Scripts/PreProduction/BoardCreator.gd" id="1_hippk"]
 
-[node name="BoardCreator" type="Node3D" unique_id=1102002025]
-script = ExtResource("1_hk4ym")
+[node name="BoardCreator" type="Node3D"]
+script = ExtResource("1_hippk")

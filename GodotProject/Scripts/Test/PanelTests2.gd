@@ -3,6 +3,7 @@ extends Node
 @export var childPanel: LayoutAnchor
 @export var vbox: VBoxContainer
 @export var animated: bool
+
 @export var anchorList:Array[PanelAnchor] = []
 
 func GetAnchor(anchorName: String):
@@ -10,14 +11,14 @@ func GetAnchor(anchorName: String):
 		if anchor.anchorName == anchorName:
 			return anchor
 	return null
-	
+
 func AnchorButton(text:String):
 	var anchor = GetAnchor(text)
 	if anchor:
 		childPanel.ToAnochorPosition(anchor, animated)
 	else:
 		print("Anchor is null")
-		
+
 func _ready():
 	#Buttons
 	var buttonShow = Button.new()
